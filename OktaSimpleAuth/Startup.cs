@@ -30,13 +30,13 @@ namespace OktaSimpleAuth
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "GoogleOpenID";
+                options.DefaultChallengeScheme = "okta";
             }).AddCookie(options =>
             {
                 options.LoginPath = "/login";
                 options.AccessDeniedPath = "/denied";
             })
-                .AddOpenIdConnect("GoogleOpenID", options =>
+                .AddOpenIdConnect("google", options =>
                 {
                     options.Authority = "https://accounts.google.com";
                     options.ClientId = "552672253869-inb03pj4244k0c6hjmqofo5437hm49po.apps.googleusercontent.com";
@@ -56,6 +56,12 @@ namespace OktaSimpleAuth
                             var claims = context.Principal.Claims;
                         }
                     };
+                }).AddOpenIdConnect("okta", options => {
+                    options.Authority = "https://dev-82557555.okta.com/oauth2/default";
+                    options.ClientId = "0oa1e2e9cdZPuBeXs5d7";
+                    options.ClientSecret = "_YwZ03PYEqbKK-y8nfH5f-PLm9KOVA5J9w-Tv39g";
+                    options.CallbackPath = "/okta-auth";
+                    options.ResponseType = "code";
                 });
         }
 
