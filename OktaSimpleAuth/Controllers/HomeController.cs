@@ -25,7 +25,7 @@ namespace OktaSimpleAuth.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize/*(Roles = "Admin")*/]
         public async Task<IActionResult> Security()
         {
             var idToken = await HttpContext.GetTokenAsync("id_token");
@@ -43,6 +43,18 @@ namespace OktaSimpleAuth.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
+        }
+
+        [HttpGet("login/{provider}")]
+        public async Task LoginExternal([FromRoute] string provider,[FromQuery] string returnUrl)
+        {
+            if(User != null && User.Identities.Any(identity => identity.IsAuthenticated))
+            {
+                RedirectToAction("", "Home");
+            }
+            returnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
+            var authenticationProperties = new AuthenticationProperties { RedirectUri = returnUrl };
+            await HttpContext.ChallengeAsync(provider, authenticationProperties).ConfigureAwait(false);
         }
 
         [Authorize]

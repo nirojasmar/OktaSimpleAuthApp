@@ -30,7 +30,7 @@ namespace OktaSimpleAuth
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "okta";
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             }).AddCookie(options =>
             {
                 options.LoginPath = "/login";
@@ -43,6 +43,7 @@ namespace OktaSimpleAuth
                     options.ClientSecret = "wEXH5McdwNsfFacEBoXNiHU_";
                     options.CallbackPath = "/auth";
                     options.SaveTokens = true;
+                    options.Prompt = "consent";
                     options.Events = new OpenIdConnectEvents()
                     {
                         OnTokenValidated = async context =>
