@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OktaSimpleAuth.Models;
 using System;
@@ -22,6 +24,34 @@ namespace OktaSimpleAuth.Controllers
         {
             return View();
         }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Security()
+        {
+            var idToken = await HttpContext.GetTokenAsync("id_token");
+            return View();
+        }
+
+        [HttpGet("denied")]
+        public IActionResult Denied()
+        {
+            return View();
+        }
+
+        [HttpGet("login")]
+        public IActionResult Login(string returnUrl)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            return Redirect("/");
+        }
+
 
         public IActionResult Privacy()
         {
