@@ -49,8 +49,8 @@ namespace OktaSimpleAuth
                 .AddOpenIdConnect("google", options =>
                 {
                     options.Authority = "https://accounts.google.com";
-                    options.ClientId = "552672253869-inb03pj4244k0c6hjmqofo5437hm49po.apps.googleusercontent.com";
-                    options.ClientSecret = "wEXH5McdwNsfFacEBoXNiHU_";
+                    options.ClientId = Configuration["GoogleOpenId:ClientId"];
+                    options.ClientSecret = Configuration["GoogleOpenId:ClientSecret"];
                     options.CallbackPath = "/auth";
                     options.SaveTokens = true;
                     options.Prompt = "consent";
@@ -68,11 +68,15 @@ namespace OktaSimpleAuth
                         }
                     };
                 }).AddOpenIdConnect("okta", options => {
-                    options.Authority = "https://dev-82557555.okta.com/oauth2/default";
-                    options.ClientId = "0oa1e2e9cdZPuBeXs5d7";
-                    options.ClientSecret = "_YwZ03PYEqbKK-y8nfH5f-PLm9KOVA5J9w-Tv39g";
+                    options.Authority = Configuration["OktaOpenId:Authority"]; 
+                    options.ClientId = Configuration["OktaOpenId:ClientId"];
+                    options.ClientSecret = Configuration["OktaOpenId:ClientSecret"];
                     options.CallbackPath = "/okta-auth";
+                    options.SignedOutCallbackPath = "/okta-signout";
                     options.ResponseType = "code";
+                    options.SaveTokens = true;
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
                 });
         }
 
