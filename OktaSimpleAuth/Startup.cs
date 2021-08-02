@@ -35,6 +35,16 @@ namespace OktaSimpleAuth
             {
                 options.LoginPath = "/login";
                 options.AccessDeniedPath = "/denied";
+                options.Events = new CookieAuthenticationEvents()
+                {
+                    OnSigningIn = async context =>
+                    {
+                        var scheme = context.Properties.Items.Where(k => k.Key == ".AuthScheme").FirstOrDefault();
+                        var claim = new Claim(scheme.Key, scheme.Value);
+                        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                        claimsIdentity.AddClaim(claim);
+                    }
+                };
             })
                 .AddOpenIdConnect("google", options =>
                 {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace OktaSimpleAuth.Controllers
@@ -55,6 +57,29 @@ namespace OktaSimpleAuth.Controllers
             returnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
             var authenticationProperties = new AuthenticationProperties { RedirectUri = returnUrl };
             await HttpContext.ChallengeAsync(provider, authenticationProperties).ConfigureAwait(false);
+        }
+
+        [Route("validate")]
+        public async Task<IActionResult> Validate(string User, string Password, string returnUrl)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            //Hook to a Database or Auth Service
+            if (User == "bob" && Password == "123")
+            {
+                var claims = new List<Claim>();
+                claims.Add(new Claim("User", User));
+                claims.Add(new Claim(ClaimTypes.NameIdentifier, User));
+                claims.Add(new Claim(ClaimTypes.Name, "Jhon Doe"));
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                var items = new Dictionary<string, string>();
+                items.Add(".AuthScheme", CookieAuthenticationDefaults.AuthenticationScheme);
+                var properties = new AuthenticationProperties(items);
+                await HttpContext.SignInAsync(claimsPrincipal, properties);
+                return Redirect(returnUrl);
+            }
+            TempData["Error"] = "Error, User or Password is invalid";
+            return View("login");
         }
 
         [Authorize]
