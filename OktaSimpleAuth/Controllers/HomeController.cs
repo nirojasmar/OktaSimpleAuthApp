@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OktaSimpleAuth.Models;
+using OktaSimpleAuth.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,10 +17,12 @@ namespace OktaSimpleAuth.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly UserService _userService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserService userService)
         {
             _logger = logger;
+            _userService = userService;
         }
 
         public IActionResult Index()
@@ -63,13 +66,8 @@ namespace OktaSimpleAuth.Controllers
         public async Task<IActionResult> Validate(string User, string Password, string returnUrl)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            //Hook to a Database or Auth Service
-            if (User == "bob" && Password == "123")
+            if(_userService.TryValidateUser(User, Password, out List<Claim> claims))
             {
-                var claims = new List<Claim>();
-                claims.Add(new Claim("User", User));
-                claims.Add(new Claim(ClaimTypes.NameIdentifier, User));
-                claims.Add(new Claim(ClaimTypes.Name, "Jhon Doe"));
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
                 var items = new Dictionary<string, string>();
@@ -78,8 +76,11 @@ namespace OktaSimpleAuth.Controllers
                 await HttpContext.SignInAsync(claimsPrincipal, properties);
                 return Redirect(returnUrl);
             }
-            TempData["Error"] = "Error, User or Password is invalid";
-            return View("login");
+            else
+            {
+                TempData["Error"] = "Error, User or Password is invalid";
+                return View("login");
+            }
         }
 
         [Authorize]

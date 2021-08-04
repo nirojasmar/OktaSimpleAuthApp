@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OktaSimpleAuth.Data;
+using OktaSimpleAuth.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace OktaSimpleAuth
         {
             services.AddControllersWithViews();
             services.AddDbContext<AuthDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<UserService>();
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
