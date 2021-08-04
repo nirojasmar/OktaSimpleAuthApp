@@ -21,7 +21,7 @@ namespace OktaSimpleAuth.Data
         {
             get
             {
-                return Roles.Split(',').ToList();
+                return Roles?.Split(',').ToList()??new List<string>();
             }
         }
     }

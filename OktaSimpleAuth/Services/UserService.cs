@@ -63,6 +63,10 @@ namespace OktaSimpleAuth.Services
             appUser.Username = claims.GetClaim("username");
             appUser.Firstname = claims.GetClaim(ClaimTypes.GivenName);
             appUser.Lastname = claims.GetClaim(ClaimTypes.Surname);
+            if (string.IsNullOrEmpty(appUser.Firstname))
+            {
+                appUser.Firstname = claims.GetClaim("name");
+            }
             appUser.Email = claims.GetClaim(ClaimTypes.Email);
             appUser.Mobile = claims.GetClaim(ClaimTypes.MobilePhone);
             var entity = _db.AppUsers.Add(appUser);

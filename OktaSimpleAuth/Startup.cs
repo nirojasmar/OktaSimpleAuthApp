@@ -52,6 +52,14 @@ namespace OktaSimpleAuth
                         if(userService != null && nameIdentifier != null)
                         {
                             var appUser = userService.GetUserByExternalProvider(scheme.Value, nameIdentifier);
+                            if(appUser is null)
+                            {
+                                appUser = userService.RegisterNewUser(scheme.Value, claimsIdentity.Claims.ToList());
+                            }
+                            foreach(var r in appUser.RoleList)
+                            {
+                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, r));
+                            }
                         }
                         claimsIdentity.AddClaim(claim);
                     }
