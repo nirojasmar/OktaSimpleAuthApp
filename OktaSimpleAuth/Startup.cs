@@ -47,6 +47,12 @@ namespace OktaSimpleAuth
                         var scheme = context.Properties.Items.Where(k => k.Key == ".AuthScheme").FirstOrDefault();
                         var claim = new Claim(scheme.Key, scheme.Value);
                         var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                        var userService = context.HttpContext.RequestServices.GetRequiredService(typeof(UserService)) as UserService;
+                        var nameIdentifier = claimsIdentity.Claims.FirstOrDefault(m => m.Type == ClaimTypes.NameIdentifier)?.Value;
+                        if(userService != null && nameIdentifier != null)
+                        {
+                            var appUser = userService.GetUserByExternalProvider(scheme.Value, nameIdentifier);
+                        }
                         claimsIdentity.AddClaim(claim);
                     }
                 };
@@ -59,19 +65,19 @@ namespace OktaSimpleAuth
                     options.CallbackPath = "/auth";
                     options.SaveTokens = true;
                     options.Prompt = "consent";
-                    options.Events = new OpenIdConnectEvents()
-                    {
-                        OnTokenValidated = async context =>
-                        {
-                            if (context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value == "104633631935742496450")
-                            {
-                                var claim = new Claim(ClaimTypes.Role, "Admin");
-                                var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-                                claimsIdentity.AddClaim(claim);
-                            }
-                            var claims = context.Principal.Claims;
-                        }
-                    };
+                    //options.Events = new OpenIdConnectEvents()
+                    //{
+                    //    OnTokenValidated = async context =>
+                    //    {
+                    //        if (context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value == "104633631935742496450")
+                    //        {
+                    //            var claim = new Claim(ClaimTypes.Role, "Admin");
+                    //            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                    //            claimsIdentity.AddClaim(claim);
+                    //        }
+                    //        var claims = context.Principal.Claims;
+                    //    }
+                    //};
                 }).AddOpenIdConnect("okta", options => {
                     options.Authority = Configuration["OktaOpenId:Authority"]; 
                     options.ClientId = Configuration["OktaOpenId:ClientId"];

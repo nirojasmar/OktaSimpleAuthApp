@@ -54,5 +54,28 @@ namespace OktaSimpleAuth.Services
                 return true;
             }
         }
+
+        internal AppUser RegisterNewUser(string provider, List<Claim> claims)
+        {
+            var appUser = new AppUser();
+            appUser.Provider = provider;
+            appUser.NameIdentifier = claims.GetClaim(ClaimTypes.NameIdentifier);
+            appUser.Username = claims.GetClaim("username");
+            appUser.Firstname = claims.GetClaim(ClaimTypes.GivenName);
+            appUser.Lastname = claims.GetClaim(ClaimTypes.Surname);
+            appUser.Email = claims.GetClaim(ClaimTypes.Email);
+            appUser.Mobile = claims.GetClaim(ClaimTypes.MobilePhone);
+            var entity = _db.AppUsers.Add(appUser);
+            _db.SaveChanges();
+            return entity.Entity;
+        }
+    }
+
+    public static class Extensions
+    {
+        public static string GetClaim(this List<Claim> claims, string name)
+        {
+            return claims.FirstOrDefault(c => c.Type == name)?.Value;
+        }
     }
 }
